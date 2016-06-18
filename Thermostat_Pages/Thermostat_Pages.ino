@@ -99,7 +99,7 @@ void setup() {
         pre_page = PICK_SCHEDULE; 
         lcd.clear();
       }
-      node_index = node_index % node_size();
+      node_index = node_index % (node_size()-1);
       schedule s = node_get(node_index);
       String t = s.hour + ": " + s.minute;
       lcd.print("Time: " + t);
@@ -110,11 +110,14 @@ void setup() {
       lcd.clear();
       if (button == PLUS_UP || button == PLUS_HOLD)
       {
-        selected += 1;
+        node_index += 1;
       }
       else if (button == MINUS_UP || button == MINUS_HOLD)
       {
-        selected -= 1;
+        node_index -= 1;
+        if(node_index < 0) {
+          node_index = (node_size()-1);
+        }
       }
       else if (button == SET_UP)
       {
@@ -145,13 +148,28 @@ void setup() {
       lcd.clear();
       if (button == PLUS_UP || button == PLUS_HOLD)
       {
-        if (value 
+        if (value % 3 == 0) {
+          s.day++;
+        } else if (value % 3 == 1) {
+          s.hour++;
+        } else {
+          s.minute++;
+        }
       }
       else if (button == MINUS_UP || button == MINUS_HOLD)
       {
-        value -= 1;
-        if(value < 0) {
-          value = 0;
+        if (value % 3 == 0) {
+          if(s.day > 0) {
+            s.day--;
+          }
+        } else if (value % 3 == 1) {
+          if(s.day > 0) {
+            s.hour--;
+          }
+        } else {
+          if(s.minute > 0) {
+            s.minute--;
+          }
         }
       }
       else if (button == SET_UP)
@@ -163,6 +181,7 @@ void setup() {
         switchPage(pre_page);
       }
     }
+    
     case MODIFY_TIME:
     {
       static int timeScaleIndex = 0;

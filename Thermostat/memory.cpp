@@ -115,7 +115,7 @@ void node_add(schedule s)
 	}
 }
 
-schedule node_get(int index)
+schedule node_get(byte index)
 {
 	schedule result;
 	unsigned int addr = MEM_FIRST_SCHEDULE_LOC;

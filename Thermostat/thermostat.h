@@ -88,12 +88,12 @@ button_type detect_button();
 enum page_type
 {
 	HOME,
-	LIST,
+	LIST_MODE,
 	MODIFY_LIST,
-	ADD,
-	DELETE_LIST,
-	MODIFY_SCHEDULE,
+  PICK_SCHEDULE,
 	ADD_SCHEDULE,
+	DELETE_SCHEDULE,
+	MODIFY_SCHEDULE,
 	MODIFY_TIME,
 	ERROR_PAGE
 };
@@ -116,7 +116,6 @@ bool operator>(const schedule&, const schedule&);
 bool operator<(const schedule&, const schedule&);
 bool operator==(const schedule&, const schedule&);
 // schedule operator=(const schedule&);
-
 
 void node_clear(byte);
 void node_resort();
