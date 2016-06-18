@@ -120,6 +120,7 @@ bool operator==(const schedule&, const schedule&);
 
 void node_clear(byte);
 void node_resort();
+int node_size();
 void node_delete(byte);
 schedule node_get(byte);
 void node_add(schedule);
