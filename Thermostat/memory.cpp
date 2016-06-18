@@ -66,7 +66,10 @@ bool operator==(const schedule& left, const schedule& right)
 // 	return left;
 // }
 
-
+int node_size()
+{
+	return EEPROM.read(MEM_SIZE_LOCATION);
+}
 
 void node_add(schedule s)
 {
@@ -146,6 +149,45 @@ void node_delete(byte index)
 		schedule temp = node_get(shift_i);
 		node_write(shift_i - 1 ,temp);
 		shift_i++;
+	}
+
+}
+
+void node_edit(byte index, schedule s)
+{
+	int insert_index = 0;
+	schedule edit_s = node_get(index);
+	if (s < edit_s)
+	{
+		insert_index = index;
+		//Foward shift
+		do
+		{
+			insert_index--;	
+			edit_s = node_get(insert_index);
+			node_write(insert_index+1,edit_s);
+		} while (s < edit_s)
+		node_write(node_write)
+	}
+	else if (s > edit_s)
+	{
+		insert_index = index + 1;
+		//Back shift
+		do
+		{
+			edit_s = node_get(insert_index);
+			node_write(insert_index+1,edit_s);
+			insert_index++;	
+		} while (s < edit_s)
+		node_write(node_write)
+	}
+	else // equal
+	{
+		//Change temp only  
+		int addr = MEM_FIRST_SCHEDULE_LOC;
+  		addr += sizeof(schedule) * index;
+		EEPROM.write(addr+3,s.temperature);
+		return;
 	}
 
 }

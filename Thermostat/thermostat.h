@@ -124,6 +124,7 @@ void node_delete(byte);
 schedule node_get(byte);
 void node_add(schedule);
 void node_write(byte,schedule);
+void node_edit(byte,schedule);
 
 
 #define	ESP_NON			0
