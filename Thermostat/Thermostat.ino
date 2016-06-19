@@ -26,6 +26,7 @@ int target_temperature = 65;
 float temp_offset = 1.5;
 String menu [4] = {"Modify Schedule", "Add Schedule", "Delete Schedule", "Modify Time"};
 int node_index = 0;
+boolean mod;
 time_t cur_time;
 LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 ESP8266 esp;
@@ -144,11 +145,13 @@ void loop() {
         switchPage(HOME);
       } else if (button == SET_UP) {
         if(selected % 4 == 0){
+          mod = true;
           switchPage(PICK_SCHEDULE);
         } else if (selected % 4 == 1) {
           switchPage(ADD_SCHEDULE);
         } else if (selected % 4 == 2) {
-          switchPage(DELETE_SCHEDULE);
+          mod = false;
+          switchPage(PICK_SCHEDULE);
         } else {
           switchPage(MODIFY_TIME);
         }
@@ -166,11 +169,11 @@ void loop() {
       //node_index = node_index % (node_size()-1);
       node_index = node_index % (3-1);
       schedule s = node_get(node_index);
-      String t = s.day +" "+ s.hour + ": " + s.minute;
+      String t =(String)s.day +" "+ (String) s.hour + ": " +(String) s.minute;
       lcd.clear();
       lcd.print(t);
       lcd.setCursor(0,1);
-      lcd.print("Targ Temp:" + s.temperature);
+      lcd.print("Targ Temp:" + (String)s.temperature);
       if (button == PLUS_UP || button == PLUS_HOLD)
       {
         node_index += 1;
@@ -185,7 +188,11 @@ void loop() {
       }
       else if (button == SET_UP)
       {
-        switchPage(MODIFY_SCHEDULE);
+        if(mod) {
+          switchPage(MODIFY_SCHEDULE);
+        } else {
+          node_delete(node_index);
+        }
       }
       else if (button == MODE_UP)
       {
@@ -203,16 +210,16 @@ void loop() {
       }
       static int value = 0;
       schedule s = node_get(node_index);     
-      String t = s.day +" "+ s.hour + ": " + s.minute;
+      String t = (String) s.day + " " + (String)s.hour + ": " + (String)s.minute;
       lcd.clear();
       lcd.print(t);
       lcd.setCursor(0,1);
       lcd.print("Temp:" + s.temperature);      
       if (button == PLUS_UP || button == PLUS_HOLD)
       {
-        if (value % 3 == 0) {
+        if (value == 0) {
           s.day++;
-        } else if (value % 3 == 1) {
+        } else if (value == 1) {
           s.hour++;
         } else {
           s.minute++;
@@ -220,11 +227,11 @@ void loop() {
       }
       else if (button == MINUS_UP || button == MINUS_HOLD)
       {
-        if (value % 3 == 0) {
+        if (value == 0) {
           if(s.day > 0) {
             s.day--;
           }
-        } else if (value % 3 == 1) {
+        } else if (value == 1) {
           if(s.day > 0) {
             s.hour--;
           }
@@ -237,6 +244,7 @@ void loop() {
       else if (button == SET_UP)
       {
         value += 1;
+        value = value % 3;
       }
       else if (button == MODE_UP)
       {
@@ -257,15 +265,11 @@ void loop() {
       s.hour = hour();
       s.minute = minute();
       s.temperature = temperature_sensor;
+      String t = (String) s.day + " " + (String)s.hour + ": " + (String)s.minute;
       lcd.clear();
-      const char str0[] = ("Temp:");
-      lcd.print(s.day);
-      lcd.print(" ");
-      lcd.print(s.hour);
-      lcd.print(": ");
-      lcd.print(s.minute);
+      lcd.print(t);
       lcd.setCursor(0,1);
-      lcd.print("Temp:" + s.temperature);      
+      lcd.print("Temp:" + s.temperature);
       if (button == PLUS_UP || button == PLUS_HOLD)
       {
         if (value == 0) {
@@ -303,6 +307,7 @@ void loop() {
         switchPage(PICK_SCHEDULE);
       }
     }
+    
     case MODIFY_TIME:
     {
       static int timeScaleIndex = 0;
