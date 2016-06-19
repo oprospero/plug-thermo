@@ -161,25 +161,31 @@ void node_edit(byte index, schedule s)
 	{
 		insert_index = index;
 		//Foward shift
-		do
+		while(s < edit_s && insert_index > 0)
 		{
+			// Grab and check previous node
+			edit_s = node_get(insert_index-1);
+			if (s >= edit_s) // If new node is greater
+				break;
+			node_write(insert_index,edit_s);
 			insert_index--;	
-			edit_s = node_get(insert_index);
-			node_write(insert_index+1,edit_s);
-		} while (s < edit_s)
-		node_write(node_write)
+		} 
+		node_write(insert_index, node_write)
 	}
 	else if (s > edit_s)
 	{
-		insert_index = index + 1;
+		insert_index = index;
 		//Back shift
-		do
+		byte max_index = size - 1;
+		while(s > edit_s && insert_index <= max_index)
 		{
-			edit_s = node_get(insert_index);
-			node_write(insert_index+1,edit_s);
+			edit_s = node_get(insert_index+1);
+			if (s <= edit_s)
+				break;
+			node_write(insert_index,edit_s);
 			insert_index++;	
-		} while (s < edit_s)
-		node_write(node_write)
+		} 
+		node_write(insert_index, node_write)
 	}
 	else // equal
 	{
