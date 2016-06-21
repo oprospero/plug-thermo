@@ -28,6 +28,15 @@ bool operator>(const schedule& left, const schedule& right)
 	else // (left.day < right.day)
 		return false;
 }
+
+bool operator>=(const schedule& left, const schedule& right)
+{
+	if (operator==(left, right))
+		return true;
+	else
+		return operator>(left,right);
+}
+
 bool operator<(const schedule& left, const schedule& right)
 {
 	if (left.day < right.day)
@@ -47,6 +56,15 @@ bool operator<(const schedule& left, const schedule& right)
 	else // (left.day > right.day)
 		return false;
 }
+
+bool operator<=(const schedule& left, const schedule& right)
+{
+	if (operator==(left, right))
+		return true;
+	else
+		return operator<(left,right);
+}
+
 bool operator==(const schedule& left, const schedule& right)
 {
 	if (left.day != right.day ||
@@ -73,7 +91,7 @@ int node_size()
 
 void node_add(schedule s)
 {
-	const byte size = EEPROM.read(MEM_SIZE_LOCATION);
+	const byte size = node_size();
 	char index = 0;
 	if (size <= MAX_NODE)
 	{
@@ -156,6 +174,7 @@ void node_delete(byte index)
 void node_edit(byte index, schedule s)
 {
 	int insert_index = 0;
+	const byte size = node_size();
 	schedule edit_s = node_get(index);
 	if (s < edit_s)
 	{
@@ -170,7 +189,7 @@ void node_edit(byte index, schedule s)
 			node_write(insert_index,edit_s);
 			insert_index--;	
 		} 
-		node_write(insert_index, node_write)
+		node_write(insert_index, s);
 	}
 	else if (s > edit_s)
 	{
@@ -185,7 +204,7 @@ void node_edit(byte index, schedule s)
 			node_write(insert_index,edit_s);
 			insert_index++;	
 		} 
-		node_write(insert_index, node_write)
+		node_write(insert_index, s);
 	}
 	else // equal
 	{

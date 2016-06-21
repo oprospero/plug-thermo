@@ -113,6 +113,8 @@ struct schedule
 int operator-(const schedule&, const schedule&);
 bool operator>(const schedule&, const schedule&);
 bool operator<(const schedule&, const schedule&);
+bool operator>=(const schedule&, const schedule&);
+bool operator<=(const schedule&, const schedule&);
 bool operator==(const schedule&, const schedule&);
 // schedule operator=(const schedule&);
 
