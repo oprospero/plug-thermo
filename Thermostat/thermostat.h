@@ -121,6 +121,7 @@ bool operator<=(const schedule&, const schedule&);
 bool operator==(const schedule&, const schedule&);
 // schedule operator=(const schedule&);
 
+void init_mem();
 void node_RESET();
 int node_size(void);
 void node_clear(byte);

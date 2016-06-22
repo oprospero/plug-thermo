@@ -3,6 +3,13 @@
 
 #include "thermostat.h"
 
+void init_mem()
+{
+	byte size = node_size();
+	if (size > MAX_NODE) {
+		node_RESET();
+	}
+}
 
 //TODO will help reduce schedule which are close in time
 int operator-(const schedule& left, const schedule& right)
@@ -25,8 +32,8 @@ bool operator>(const schedule& left, const schedule& right)
 				return false;
 		}
 	}
-	else // (left.day < right.day)
-		return false;
+	 // (left.day < right.day)
+	return false;
 }
 
 bool operator>=(const schedule& left, const schedule& right)
@@ -96,31 +103,41 @@ int node_size()
 
 void node_add(schedule s)
 {
-	const byte size = node_size();
+	PTLS("Adding node");
+	const char size = node_size();
 	char index = 0;
 	if (size <= MAX_NODE)
 	{
 		while (index < size)
 		{
+			PTS("Index: "); PTL((int)index);
 			schedule sofi = node_get(index);
 			if (s > sofi)
 			{
+				PTLS("Greater");
 				index++;
 			}
 			else if (s == sofi)
 			{
+				PTLS("Equal");
+				int addr = MEM_FIRST_SCHEDULE_LOC;
+		  		addr += sizeof(schedule) * index;
+				EEPROM.write(addr+3,s.temperature);
 				return;
 			}
 			else // (s < sofi)
 			{
+				PTLS("LESS");
 				//shift scheuldes forward
-				byte shift_i = size;
+				char shift_i = size;
 				while (shift_i >= index)
 				{
+					PTS("Shift: "); PTL((int)shift_i);
 					schedule temp = node_get(shift_i-1);
 					node_write(shift_i,temp);
 					shift_i--;
 				}
+				PTLS("Added");
 				//add schedule
 				node_write(index,s);
 				break;
@@ -129,6 +146,7 @@ void node_add(schedule s)
 		// If we reach the end add it there
 		if (index == size)
 		{
+			PTLS("Added to End");
 			node_write(index,s);
 		}
 		EEPROM.write(MEM_SIZE_LOCATION,size+1);
@@ -137,6 +155,7 @@ void node_add(schedule s)
 	{
 		//IDEA: edit closest schedule with given s 
 		// For now do nothing
+		PTLS("Memory Maxed");
 		return;
 	}
 }
