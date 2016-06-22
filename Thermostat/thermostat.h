@@ -33,6 +33,9 @@ directly for the Remote-Temperature-Sensing Plugin-Thermostat
 
 extern float temperature_sensor;
 
+
+void check_serial_cmd();
+
 class commBase
 {
 public:
@@ -118,6 +121,8 @@ bool operator<=(const schedule&, const schedule&);
 bool operator==(const schedule&, const schedule&);
 // schedule operator=(const schedule&);
 
+void node_RESET();
+int node_size(void);
 void node_clear(byte);
 void node_resort();
 void node_delete(byte);

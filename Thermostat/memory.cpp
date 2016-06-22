@@ -84,6 +84,11 @@ bool operator==(const schedule& left, const schedule& right)
 // 	return left;
 // }
 
+void node_RESET()
+{
+	EEPROM.write(MEM_SIZE_LOCATION,0);
+}
+
 int node_size()
 {
 	return EEPROM.read(MEM_SIZE_LOCATION);

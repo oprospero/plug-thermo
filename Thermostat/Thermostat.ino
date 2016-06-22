@@ -30,6 +30,8 @@ time_t cur_time;
 LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 ESP8266 esp;
 
+// Holds string values for weekdays
+const String dayShortNames_P = "ErrSunMonTueWedThuFriSat";
 long timeScale[3] = {SCALE_DAY, SCALE_HOUR, SCALE_MIN};
 String menu [4] = {"Modify Schedule", "Add Schedule", "Delete Schedule", "Modify Time"};
 
@@ -44,9 +46,9 @@ void setup() {
   init_button();
   init_wifi();
 
+  setSyncInterval( 5 ); // Set small so we can sync asap
   //Setting up callback for updating time
   setSyncProvider( (getExternalTime) espUpdateTime);
-  setSyncInterval( 5 ); // Set small so we can sync asap
   
 //  lcd.clear();
   lcd.print("Initialized");
@@ -57,7 +59,7 @@ void setup() {
 String getTimeString(time_t t = now());
 
 void loop() {
-
+  check_serial_cmd();
   com.read();
   if (temperature_sensor > target_temperature + temp_offset || temperature_sensor <= 10)  {
 //    last_state_on = false;
@@ -163,7 +165,7 @@ void loop() {
       //node_index = node_index % (node_size()-1);
       node_index = node_index % (3-1);
       schedule s = node_get(node_index);
-      String t =(String)s.day +" "+ (String) s.hour + ": " +(String) s.minute;
+      String t = getTimeString(s);
       lcd.clear();
       lcd.print(t);
       lcd.setCursor(0,1);
@@ -198,51 +200,59 @@ void loop() {
 
     case MODIFY_SCHEDULE:
     {
+      static int value = 0;
+      static schedule s = node_get(node_index);   
       if(pre_page != MODIFY_SCHEDULE) {
         PTLS("Page Modify Schedule");
         pre_page = MODIFY_SCHEDULE; 
         lcd.clear();
-      }
-      static int value = 0;
-      schedule s = node_get(node_index);     
-      String t = (String) s.day + " " + (String)s.hour + ": " + (String)s.minute;
+
+        //Need to reintialize everytime we enter the page but not every refresh
+        s.day = weekday();
+        s.hour = hour();
+        s.minute = minute();
+        s.temperature = temperature_sensor;
+        value = 0;
+      }  
+      String t = getTimeString(s);
       lcd.clear();
       lcd.print(t);
       lcd.setCursor(0,1);
       lcd.print("Temp:" + s.temperature);      
-      if (button == PLUS_UP || button == PLUS_HOLD)
-      {
+      if (button == PLUS_UP || button == PLUS_HOLD) {
         if (value == 0) {
           s.day++;
+          if (s.day >= 8) s.day = 1;
         } else if (value == 1) {
           s.hour++;
-        } else {
+          if (s.hour >= 24) s.hour = 0;
+        } else if (value == 2) {
           s.minute++;
+          if (s.minute >= 60) s.minute = 0;
+        } else if (value == 3) {
+          s.temperature++;
+          if (s.temperature >= 99) 
+            s.temperature = 99;
         }
-      }
-      else if (button == MINUS_UP || button == MINUS_HOLD)
-      {
+      } else if (button == MINUS_UP || button == MINUS_HOLD) {
         if (value == 0) {
-          if(s.day > 0) {
-            s.day--;
-          }
+          s.day--;
+          if (s.day <= 0) s.day = 7;
         } else if (value == 1) {
-          if(s.day > 0) {
-            s.hour--;
-          }
-        } else {
-          if(s.minute > 0) {
-            s.minute--;
-          }
+          s.hour--;
+          if (s.hour >= 24) s.hour = 23;
+        } else if (value == 2) {
+          s.minute--;
+          if (s.minute >= 60) s.minute = 59;
+        } else if (value == 3) {
+          s.temperature--;
+          if (s.temperature <= 32) 
+          s.temperature = 32;
         }
-      }
-      else if (button == SET_UP)
-      {
+      } else if (button == SET_UP) {
         value += 1;
-        value = value % 3;
-      }
-      else if (button == MODE_UP)
-      {
+        value = value % 4;
+      } else if (button == MODE_UP) {
         switchPage(PICK_SCHEDULE);
       }
       break;
@@ -251,51 +261,62 @@ void loop() {
     case ADD_SCHEDULE:
     {
       static schedule s; //Schedule to be added
+      static int value = 0;
       if(pre_page != ADD_SCHEDULE) {
         PTLS("Page Add Schedule");
         pre_page = ADD_SCHEDULE; 
         lcd.clear();
+        
         //Need to reintialize everytime we enter the page but not every refresh
         s.day = weekday();
         s.hour = hour();
         s.minute = minute();
+        s.temperature = temperature_sensor;
+        value = 0;
       }
-      static int value = 0;
-      s.temperature = temperature_sensor;
-      String t = (String) s.day + " " + (String)s.hour + ": " + (String)s.minute;
+      String t = getTimeString(s);
       lcd.home();
       lcd.print(t);
       lcd.setCursor(0,1);
-      lcd.print("Temp:" + s.temperature);
+      lcd.print(F("Temp: "));
+      lcd.print(s.temperature);
       if (button == PLUS_UP || button == PLUS_HOLD) {
         if (value == 0) {
           s.day++;
+          if (s.day >= 8) s.day = 1;
         } else if (value == 1) {
           s.hour++;
-        } else {
+          if (s.hour >= 24) s.hour = 0;
+        } else if (value == 2) {
           s.minute++;
+          if (s.minute >= 60) s.minute = 0;
+        } else if (value == 3) {
+          s.temperature++;
+          if (s.temperature >= 99) 
+            s.temperature = 99;
         }
       }
       else if (button == MINUS_UP || button == MINUS_HOLD) {
         if (value == 0) {
-          if(s.day > 0) {
-            s.day--;
-          }
+          s.day--;
+          if (s.day <= 0) s.day = 7;
         } else if (value == 1) {
-          if(s.day > 0) {
-            s.hour--;
-          }
-        } else {
-          if(s.minute > 0) {
-            s.minute--;
-          }
+          s.hour--;
+          if (s.hour >= 24) s.hour = 23;
+        } else if (value == 2) {
+          s.minute--;
+          if (s.minute >= 60) s.minute = 59;
+        } else if (value == 3) {
+          s.temperature--;
+          if (s.temperature <= 32) 
+            s.temperature = 32;
         }
-      } else if (button == SET_UP)  {
+      } else if (button == MODE_UP)  {
         value += 1;
-        value = value % 3;
-      } else if (button == MODE_UP) {
+        value = value % 4;
+      } else if (button == SET_UP) {
         node_add(s);
-        switchPage(PICK_SCHEDULE);
+        switchPage(LIST_MODE);
       }
       break;
     }
@@ -351,7 +372,7 @@ void initialize_diplay()
 {
  // initialize the lcd 
   lcd.init();
-  lcd.print("Initializing");
+  lcd.print(F("Initializing"));
   lcd.backlight();
   delay(1000);
   lcd.clear();
@@ -360,8 +381,6 @@ void initialize_diplay()
 
 String getTimeString(time_t t)
 {
-  // Holds string values for weekdays
-  const String dayShortNames_P = "ErrSunMonTueWedThuFriSat";
   // String holder to return
   String dateStr;
   byte _day = weekday(t);
@@ -395,6 +414,33 @@ String getTimeString(time_t t)
   return dateStr;
 }
 
+String getTimeString(schedule &s)
+{
+  // String holder to return
+  String dateStr;
+  byte _day = s.day;
+  byte sub1 = _day * 3;
+  byte sub2 = sub1 + 3;
+  dateStr = dayShortNames_P.substring(sub1, sub2);
+  
+  //Example "Sun "
+  dateStr.concat(" ");
+
+  int _hour = s.hour;
+  if(_hour < 10) {
+    dateStr.concat(" ");
+  }
+  dateStr.concat(_hour); // EX: "Sun 10"
+  dateStr.concat(":");  // EX: "Sun 10:"
+  
+  int _minute = s.minute;
+  if(_minute < 10) {
+    dateStr.concat("0");
+  }
+  dateStr.concat(_minute); // EX: "Sun 10:1"
+    
+  return dateStr;
+}
 void init_wifi()
 {
   esp.begin();
@@ -412,6 +458,7 @@ time_t espUpdateTime()
   // Add extra check to insure time is valid
   if (!time_synced && t > 60000) 
   {
+    PTLS("Sync good");
     time_synced = true;
     setSyncInterval(3600);
   }
