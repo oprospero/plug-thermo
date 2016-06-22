@@ -24,7 +24,7 @@ page_type pre_page = page_type::ERROR_PAGE;
 float temperature_sensor;
 int target_temperature = 65;
 float temp_offset = 1.5;
-int node_index = 0;
+char node_index = 0;
 boolean mod = false;
 time_t cur_time;
 LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
@@ -45,7 +45,7 @@ void setup() {
   initialize_diplay();
   init_button();
   init_wifi();
-
+  init_mem();
   setSyncInterval( 5 ); // Set small so we can sync asap
   //Setting up callback for updating time
   setSyncProvider( (getExternalTime) espUpdateTime);
@@ -117,7 +117,7 @@ void loop() {
     
     case LIST_MODE:  
     {
-      static int selected= 0;
+      static char selected = 0;
       if(pre_page != LIST_MODE) {
         PTLS("Page List Modes");
         pre_page = LIST_MODE; 
@@ -157,29 +157,38 @@ void loop() {
     
     case PICK_SCHEDULE:
     {
+      static byte prev_index = 0;
       if(pre_page != PICK_SCHEDULE) {
         PTLS(" Page Pick Schedule");
         pre_page = PICK_SCHEDULE; 
         lcd.clear();
+        node_index = node_index % (node_size()-1);
+        prev_index = node_index + 1;
       }
-      //node_index = node_index % (node_size()-1);
-      node_index = node_index % (3-1);
-      schedule s = node_get(node_index);
-      String t = getTimeString(s);
-      lcd.clear();
-      lcd.print(t);
-      lcd.setCursor(0,1);
-      lcd.print("Targ Temp:" + (String)s.temperature);
+      
+      if (prev_index != node_index) {
+        prev_index == node_index;
+        schedule s = node_get(node_index);
+        String t = getTimeString(s);
+        lcd.home();
+        if (mod) lcd.print(F("Mod:"));
+        else lcd.print(F("Del: "));
+        lcd.print(t);
+        lcd.setCursor(0,1);
+        lcd.print("Targ Temp:" + (String)s.temperature);
+      }
+      
       if (button == PLUS_UP || button == PLUS_HOLD)
       {
         node_index += 1;
+        if (node_index >= node_size())
+          node_index = 0;
       }
       else if (button == MINUS_UP || button == MINUS_HOLD)
       {
         node_index -= 1;
         if(node_index < 0) {
-          //node_index = (node_size()-1);
-          node_index =(3-1);
+          node_index = (node_size()-1);
         }
       }
       else if (button == SET_UP)
@@ -215,7 +224,7 @@ void loop() {
         value = 0;
       }  
       String t = getTimeString(s);
-      lcd.clear();
+      lcd.home();
       lcd.print(t);
       lcd.setCursor(0,1);
       lcd.print("Temp:" + s.temperature);      
@@ -308,7 +317,7 @@ void loop() {
           if (s.minute >= 60) s.minute = 59;
         } else if (value == 3) {
           s.temperature--;
-          if (s.temperature <= 32) 
+          if (s.temperature <= 32 || s.temperature >= 99) 
             s.temperature = 32;
         }
       } else if (button == MODE_UP)  {
@@ -316,6 +325,7 @@ void loop() {
         value = value % 4;
       } else if (button == SET_UP) {
         node_add(s);
+        PTLS("Node deleted");
         switchPage(LIST_MODE);
       }
       break;
