@@ -96,6 +96,11 @@ void node_RESET()
 	EEPROM.write(MEM_SIZE_LOCATION,0);
 }
 
+void node_setSize(byte size)
+{
+	EEPROM.write(MEM_SIZE_LOCATION,size);
+}
+
 int node_size()
 {
 	return EEPROM.read(MEM_SIZE_LOCATION);
@@ -149,7 +154,7 @@ void node_add(schedule s)
 			PTLS("Added to End");
 			node_write(index,s);
 		}
-		EEPROM.write(MEM_SIZE_LOCATION,size+1);
+		node_setSize(size +1);
 	}
 	else if (size > MAX_NODE)
 	{
@@ -192,7 +197,7 @@ void node_delete(byte index)
 		node_write(shift_i - 1 ,temp);
 		shift_i++;
 	}
-
+	node_setSize(size -1);
 }
 
 void node_edit(byte index, schedule s)

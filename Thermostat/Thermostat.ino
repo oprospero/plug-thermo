@@ -33,7 +33,7 @@ ESP8266 esp;
 // Holds string values for weekdays
 const String dayShortNames_P = "ErrSunMonTueWedThuFriSat";
 long timeScale[3] = {SCALE_DAY, SCALE_HOUR, SCALE_MIN};
-String menu [4] = {"Modify Schedule", "Add Schedule", "Delete Schedule", "Modify Time"};
+String menu [4] = {"Modify Schedule", "Add Schedule", "Delete Schedule", "Modify Time    "};
 
 // Basic startup code
 void setup() {
@@ -196,7 +196,10 @@ void loop() {
         if(mod) {
           switchPage(MODIFY_SCHEDULE);
         } else {
+          PTLS("Node deleted");
           node_delete(node_index);
+          node_index = (node_size()-1);
+          prev_index = node_index + 1;
         }
       }
       else if (button == MODE_UP)
@@ -285,6 +288,7 @@ void loop() {
       }
       String t = getTimeString(s);
       lcd.home();
+      lcd.print(F("Add: "));
       lcd.print(t);
       lcd.setCursor(0,1);
       lcd.print(F("Temp: "));
@@ -325,7 +329,6 @@ void loop() {
         value = value % 4;
       } else if (button == SET_UP) {
         node_add(s);
-        PTLS("Node deleted");
         switchPage(LIST_MODE);
       }
       break;
