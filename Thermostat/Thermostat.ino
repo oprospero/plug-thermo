@@ -40,7 +40,7 @@ String menu [4] = {"Modify Schedule", "Add Schedule", "Delete Schedule", "Modify
 void setup() {
   Serial.begin(9600);
   PTLS("Initializing");
-
+  
   com.begin();
   pinMode(RELAY_PIN, OUTPUT); 
   initialize_diplay();
@@ -61,7 +61,14 @@ String getTimeString(time_t t = now());
 
 void loop() {
   check_serial_cmd();
-  com.read();
+  
+  //Update temperature reading
+  com.read(); //Maybe split into more functions?
+
+  //Update schedule to new target temperature
+  updateTargetTemperature();
+
+  
   if (temperature_sensor > target_temperature + temp_offset || temperature_sensor <= 10)  {
 //    last_state_on = false;
     digitalWrite(RELAY_PIN, OFF);
@@ -264,7 +271,7 @@ void loop() {
         value += 1;
         value = value % 4;
       } else if (button == MODE_UP) {
-        edit_node(node_index,s);
+        node_edit(node_index,s);
         switchPage(PICK_SCHEDULE);
       }
       break;
@@ -454,7 +461,7 @@ String getTimeString(schedule &s)
     
   return dateStr;
 }
-void init_wifi()
+inline void init_wifi()
 {
   esp.begin();
   esp.check();
@@ -485,4 +492,19 @@ void switchPage(page_type _page) {
   lcd.clear();
 }
 
+inline void updateTargetTemperature() {
+  time_t t = now();
+  schedule s = convertTimeFormat(t);
+  schedule nextTarg = node_get(currentNodeIndex);
+  if (s >= nextTarg)
+    target_temperature = nextTarg.temperature;
+}
+
+schedule convertTimeFormat(time_t &t) {
+  schedule s;
+  s.day = weekday(t);
+  s.hour = hour(t);
+  s.minute = minute(t);
+  return s;
+}
 
