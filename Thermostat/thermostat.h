@@ -122,16 +122,23 @@ bool operator==(const schedule&, const schedule&);
 // schedule operator=(const schedule&);
 
 void init_mem();
+// Will reset schedules to default
 void node_RESET();
+// Adds a node, will kept structure sorted
+void node_add(schedule);
+// Will edit a node while keeping sorted structure
+void node_edit(byte,schedule);
+// Delete a node and shift the rest of the node
+void node_delete(byte);
+// The number of nodes in the list
 int node_size(void);
+// Grab node in the list of given index regarless of size
+schedule node_get(byte);
+// Writes a node to a particular index regardless of size
+void node_write(byte,schedule);
+
 void node_clear(byte);
 void node_resort();
-void node_delete(byte);
-schedule node_get(byte);
-void node_add(schedule);
-void node_write(byte,schedule);
-void node_edit(byte,schedule);
-
 
 #define	ESP_NON			0
 #define	ESP_FOUND		1

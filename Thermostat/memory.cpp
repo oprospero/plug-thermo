@@ -91,15 +91,48 @@ bool operator==(const schedule& left, const schedule& right)
 // 	return left;
 // }
 
-void node_RESET()
-{
-	EEPROM.write(MEM_SIZE_LOCATION,0);
-}
 
 void node_setSize(byte size)
 {
 	EEPROM.write(MEM_SIZE_LOCATION,size);
 }
+
+/*
+00:	1, 	8,	00,	50
+01:	1, 	18, 00,	70
+02:	2, 	8,	00,	50
+03:	2, 	18, 00,	70
+04:	3, 	8,	00,	50
+05:	3, 	18, 00,	70
+06:	4, 	8,	00,	50
+07:	4, 	18, 00,	70
+08:	5, 	8,	00,	50
+09:	5, 	18,	00,	70
+10:	6, 	8,	00,	50
+11:	6, 	18, 00,	70
+12:	7, 	8,	00,	50
+13:	7, 	18, 00,	70
+*/
+
+void node_RESET()
+{
+	for (int i = 0; i < 14; i++) {
+		schedule s;
+		s.day = i / 2 + 1;
+		s.minute = 0;
+		if (i % 2  == 0) {
+			s.hour = 8;
+			s.temperature = 50;
+		}
+		else {
+			s.hour = 18;
+			s.temperature = 70;
+		}
+		node_write(i,s);
+	}
+	node_setSize(14);
+}
+
 
 int node_size()
 {
