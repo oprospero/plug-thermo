@@ -25,6 +25,7 @@ float temperature_sensor;
 int target_temperature = 65;
 float temp_offset = 1.5;
 char node_index = 0;
+char currentNodeIndex = 0;
 boolean mod = false;
 time_t cur_time;
 LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
@@ -220,9 +221,7 @@ void loop() {
         lcd.clear();
 
         //Need to reintialize everytime we enter the page but not every refresh
-        s.day = weekday();
-        s.hour = hour();
-        s.minute = minute();
+        s = node_get(node_index);
         s.temperature = temperature_sensor;
         value = 0;
       }  
@@ -265,6 +264,7 @@ void loop() {
         value += 1;
         value = value % 4;
       } else if (button == MODE_UP) {
+        edit_node(node_index,s);
         switchPage(PICK_SCHEDULE);
       }
       break;
