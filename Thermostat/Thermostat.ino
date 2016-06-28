@@ -84,6 +84,9 @@ void loop() {
   
   // This switch cases are responsible for displaying different content
   // on the LCD
+
+  //Moved out since we call this regardless of page.
+  lcd.home(); //Resets cursor 
   switch (page) 
   {
     case HOME: {
@@ -91,9 +94,7 @@ void loop() {
         PTLS("Page Home");
         pre_page = HOME;
         updateNodeIndex(now());
-        lcd.clear();
       }
-      lcd.home(); //Resets cursor 
       const char str0[] = ("Temp:");
       // char str1[] = "Time:";
       lcd.print(str0);
@@ -170,7 +171,6 @@ void loop() {
       if(pre_page != PICK_SCHEDULE) {
         PTLS(" Page Pick Schedule");
         pre_page = PICK_SCHEDULE; 
-        lcd.clear();
         node_index = node_index % (node_size()-1);
         prev_index = node_index + 1;
       }
@@ -226,7 +226,6 @@ void loop() {
       if(pre_page != MODIFY_SCHEDULE) {
         PTLS("Page Modify Schedule");
         pre_page = MODIFY_SCHEDULE; 
-        lcd.clear();
 
         //Need to reintialize everytime we enter the page but not every refresh
         s = node_get(node_index);
@@ -284,7 +283,6 @@ void loop() {
       if(pre_page != ADD_SCHEDULE) {
         PTLS("Page Add Schedule");
         pre_page = ADD_SCHEDULE; 
-        lcd.clear();
         
         //Need to reintialize everytime we enter the page but not every refresh
         s.day = weekday();
@@ -348,7 +346,6 @@ void loop() {
       {
         PTLS("Page Mod Time");
         pre_page = MODIFY_TIME;
-        lcd.clear();
         lcd.cursor();
       }
       lcd.setCursor(0,1);

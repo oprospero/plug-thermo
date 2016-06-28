@@ -12,6 +12,7 @@ void init_button()
 button_type detect_button()
 {
 	static button_type prev = NONE;
+	static unsigned int time_button = 0;
 	button_type b = NONE;
 
 	bool button_in = digitalRead(BUTTON_PLUS_PIN);
@@ -19,6 +20,7 @@ button_type detect_button()
 	if (prev == NONE && button_in == LOW) //Press down
 	{
 		b = PLUS_DOWN;
+		time_button = millis();
 	}
 	else if ((prev == PLUS_DOWN || prev == PLUS_HOLD) && button_in == LOW) //Hold
 	{
