@@ -60,8 +60,8 @@ bool operator<(const schedule& left, const schedule& right)
 				return false;
 		}
 	}
-	else // (left.day > right.day)
-		return false;
+	// (left.day > right.day)
+	return false;
 }
 
 bool operator<=(const schedule& left, const schedule& right)

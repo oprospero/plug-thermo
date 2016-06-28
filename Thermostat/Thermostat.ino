@@ -90,6 +90,7 @@ void loop() {
       if (pre_page != HOME) {
         PTLS("Page Home");
         pre_page = HOME;
+        updateNodeIndex(now());
         lcd.clear();
       }
       lcd.home(); //Resets cursor 
@@ -183,7 +184,7 @@ void loop() {
         else lcd.print(F("Del: "));
         lcd.print(t);
         lcd.setCursor(0,1);
-        lcd.print("Targ Temp:" + (String)s.temperature);
+        lcd.print("Targ Temp: " + (String)s.temperature);
       }
       
       if (button == PLUS_UP || button == PLUS_HOLD)
@@ -229,14 +230,13 @@ void loop() {
 
         //Need to reintialize everytime we enter the page but not every refresh
         s = node_get(node_index);
-        s.temperature = temperature_sensor;
         value = 0;
       }  
       String t = getTimeString(s);
       lcd.home();
       lcd.print(t);
       lcd.setCursor(0,1);
-      lcd.print("Temp:" + s.temperature);      
+      lcd.print("Temp: " + (String) s.temperature);
       if (button == PLUS_UP || button == PLUS_HOLD) {
         if (value == 0) {
           s.day++;
@@ -264,13 +264,13 @@ void loop() {
           if (s.minute >= 60) s.minute = 59;
         } else if (value == 3) {
           s.temperature--;
-          if (s.temperature <= 32) 
+          if (s.temperature <= 32 || s.temperature >= 99) 
           s.temperature = 32;
         }
-      } else if (button == SET_UP) {
+      } else if (button == MODE_UP) {
         value += 1;
         value = value % 4;
-      } else if (button == MODE_UP) {
+      } else if (button == SET_UP) {
         node_edit(node_index,s);
         switchPage(PICK_SCHEDULE);
       }
@@ -481,6 +481,7 @@ time_t espUpdateTime()
     PTLS("Sync good");
     time_synced = true;
     setSyncInterval(3600);
+    updateNodeIndex(t);
   }
   return t;
 }
@@ -494,10 +495,34 @@ void switchPage(page_type _page) {
 
 inline void updateTargetTemperature() {
   time_t t = now();
-  schedule s = convertTimeFormat(t);
-  schedule nextTarg = node_get(currentNodeIndex);
-  if (s >= nextTarg)
-    target_temperature = nextTarg.temperature;
+  schedule s_now = convertTimeFormat(t);
+  char nextNodeIndex = currentNodeIndex + 1;
+  if (nextNodeIndex >= node_size()) {
+    nextNodeIndex = 0;
+  }
+  schedule nextNode = node_get(nextNodeIndex);
+  if (s_now >= nextNode){
+    currentNodeIndex = nextNodeIndex;
+    target_temperature = nextNode.temperature;
+    PTS("Current node: ");
+    PTL(currentNodeIndex, DEC);
+    PTS("Target Temp: ");
+    PTL(target_temperature, DEC);
+  }
+}
+
+void updateNodeIndex(time_t t) {
+  schedule s_now = convertTimeFormat(t);
+  schedule nextTarg;
+  char thisNodeIndex = -1;
+  do {
+    thisNodeIndex++;
+    nextTarg = node_get(thisNodeIndex);
+  } while (s_now >= nextTarg);
+  PTS("Current node: ");
+  PTL(thisNodeIndex, DEC);
+  currentNodeIndex = thisNodeIndex;
+  
 }
 
 schedule convertTimeFormat(time_t &t) {
