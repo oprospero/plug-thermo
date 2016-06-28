@@ -87,6 +87,7 @@ inline void page_home() {
   if (pre_page != HOME) {
     PTLS("Page Home");
     pre_page = HOME;
+    lcd.noCursor();
     // updateNodeIndex(now());
   }
   const char str0[] = ("Temp:");
@@ -122,6 +123,7 @@ inline void page_listMode() {
   static char selected = 0;
   if(pre_page != LIST_MODE) {
     PTLS("Page List Modes");
+    lcd.cursor();
     pre_page = LIST_MODE; 
     selected = 0;
   }
@@ -159,6 +161,7 @@ inline void page_pickSchedule() {
   static byte prev_index = 0;
   if(pre_page != PICK_SCHEDULE) {
     PTLS(" Page Pick Schedule");
+    lcd.cursor();
     pre_page = PICK_SCHEDULE; 
     node_index = node_index % (node_size()-1);
     prev_index = node_index + 1;
@@ -210,8 +213,8 @@ inline void page_modifySchedule(){
   static schedule s = node_get(node_index);   
   if(pre_page != MODIFY_SCHEDULE) {
     PTLS("Page Modify Schedule");
+    lcd.cursor();
     pre_page = MODIFY_SCHEDULE; 
-
     //Need to reintialize everytime we enter the page but not every refresh
     s = node_get(node_index);
     value = 0;
@@ -265,7 +268,8 @@ inline void page_addSchedule() {
   if(pre_page != ADD_SCHEDULE) {
     PTLS("Page Add Schedule");
     pre_page = ADD_SCHEDULE; 
-    
+    lcd.cursor();
+  
     //Need to reintialize everytime we enter the page but not every refresh
     s.day = weekday();
     s.hour = hour();
