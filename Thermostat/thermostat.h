@@ -18,6 +18,7 @@ directly for the Remote-Temperature-Sensing Plugin-Thermostat
 #include <SoftwareSerial.h>
 #include <Time.h>
 #include <EEPROM.h>
+#include <LiquidCrystal_I2C.h>
 
 #define BUTTON_PLUS_PIN		5
 #define BUTTON_MINUS_PIN	3
@@ -31,9 +32,23 @@ directly for the Remote-Temperature-Sensing Plugin-Thermostat
 #define ESP_RX_PIN A1
 #define ESP_RST_PIN 7
 
+
+#define RELAY_PIN 6 // Set to whichever pin is being used to control relay
+#define ON HIGH
+#define OFF LOW
+
+#define SCALE_MIN   60
+#define SCALE_HOUR  SCALE_MIN * 60
+#define SCALE_DAY   86400
+//const long SCALE_DAY = SCALE_HOUR * 24;
+
 extern float temperature_sensor;
+extern int target_temperature;
+extern LiquidCrystal_I2C lcd;
+extern char node_index;
+extern char currentNodeIndex;
 
-
+void updateLCDscreen();
 void check_serial_cmd();
 
 class commBase
@@ -82,6 +97,7 @@ enum button_type
 	MODE_HOLD,
 	MODE_UP
 };
+extern button_type button_input;
 
 
 void init_button();
