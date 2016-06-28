@@ -52,7 +52,7 @@ time_t ESP8266::getTime()
 	{
 		// PTL("Reading time");
 		readBytes(ptr,4);
-		PTL(result);
+		// PTL(result);
 		return result;
 	}
 	else

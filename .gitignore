@@ -31,4 +31,15 @@
 # Debug files
 *.dSYM/
 
+# CDT-specific (C/C++ Development Tooling)
+.cproject
+
+# Eclipse Core
+.project
+
+
 stino.settings
+.metadata/
+
+#windows crap
+.ini

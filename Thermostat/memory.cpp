@@ -3,6 +3,13 @@
 
 #include "thermostat.h"
 
+void init_mem()
+{
+	byte size = node_size();
+	if (size > MAX_NODE) {
+		node_RESET();
+	}
+}
 
 //TODO will help reduce schedule which are close in time
 int operator-(const schedule& left, const schedule& right)
@@ -25,9 +32,18 @@ bool operator>(const schedule& left, const schedule& right)
 				return false;
 		}
 	}
-	else // (left.day < right.day)
-		return false;
+	 // (left.day < right.day)
+	return false;
 }
+
+bool operator>=(const schedule& left, const schedule& right)
+{
+	if (operator==(left, right))
+		return true;
+	else
+		return operator>(left,right);
+}
+
 bool operator<(const schedule& left, const schedule& right)
 {
 	if (left.day < right.day)
@@ -44,9 +60,18 @@ bool operator<(const schedule& left, const schedule& right)
 				return false;
 		}
 	}
-	else // (left.day > right.day)
-		return false;
+	// (left.day > right.day)
+	return false;
 }
+
+bool operator<=(const schedule& left, const schedule& right)
+{
+	if (operator==(left, right))
+		return true;
+	else
+		return operator<(left,right);
+}
+
 bool operator==(const schedule& left, const schedule& right)
 {
 	if (left.day != right.day ||
@@ -66,6 +91,49 @@ bool operator==(const schedule& left, const schedule& right)
 // 	return left;
 // }
 
+
+void node_setSize(byte size)
+{
+	EEPROM.write(MEM_SIZE_LOCATION,size);
+}
+
+/*
+00:	1, 	8,	00,	50
+01:	1, 	18, 00,	70
+02:	2, 	8,	00,	50
+03:	2, 	18, 00,	70
+04:	3, 	8,	00,	50
+05:	3, 	18, 00,	70
+06:	4, 	8,	00,	50
+07:	4, 	18, 00,	70
+08:	5, 	8,	00,	50
+09:	5, 	18,	00,	70
+10:	6, 	8,	00,	50
+11:	6, 	18, 00,	70
+12:	7, 	8,	00,	50
+13:	7, 	18, 00,	70
+*/
+
+void node_RESET()
+{
+	for (int i = 0; i < 14; i++) {
+		schedule s;
+		s.day = i / 2 + 1;
+		s.minute = 0;
+		if (i % 2  == 0) {
+			s.hour = 8;
+			s.temperature = 50;
+		}
+		else {
+			s.hour = 18;
+			s.temperature = 70;
+		}
+		node_write(i,s);
+	}
+	node_setSize(14);
+}
+
+
 int node_size()
 {
 	return EEPROM.read(MEM_SIZE_LOCATION);
@@ -73,31 +141,41 @@ int node_size()
 
 void node_add(schedule s)
 {
-	const byte size = EEPROM.read(MEM_SIZE_LOCATION);
+	PTLS("Adding node");
+	const char size = node_size();
 	char index = 0;
 	if (size <= MAX_NODE)
 	{
 		while (index < size)
 		{
+			PTS("Index: "); PTL((int)index);
 			schedule sofi = node_get(index);
 			if (s > sofi)
 			{
+				PTLS("Greater");
 				index++;
 			}
 			else if (s == sofi)
 			{
+				PTLS("Equal");
+				int addr = MEM_FIRST_SCHEDULE_LOC;
+		  		addr += sizeof(schedule) * index;
+				EEPROM.write(addr+3,s.temperature);
 				return;
 			}
 			else // (s < sofi)
 			{
+				PTLS("LESS");
 				//shift scheuldes forward
-				byte shift_i = size;
+				char shift_i = size;
 				while (shift_i >= index)
 				{
+					PTS("Shift: "); PTL((int)shift_i);
 					schedule temp = node_get(shift_i-1);
 					node_write(shift_i,temp);
 					shift_i--;
 				}
+				PTLS("Added");
 				//add schedule
 				node_write(index,s);
 				break;
@@ -106,19 +184,21 @@ void node_add(schedule s)
 		// If we reach the end add it there
 		if (index == size)
 		{
+			PTLS("Added to End");
 			node_write(index,s);
 		}
-		EEPROM.write(MEM_SIZE_LOCATION,size+1);
+		node_setSize(size +1);
 	}
 	else if (size > MAX_NODE)
 	{
 		//IDEA: edit closest schedule with given s 
 		// For now do nothing
+		PTLS("Memory Maxed");
 		return;
 	}
 }
 
-schedule node_get(int index)
+schedule node_get(byte index)
 {
 	schedule result;
 	unsigned int addr = MEM_FIRST_SCHEDULE_LOC;
@@ -150,12 +230,13 @@ void node_delete(byte index)
 		node_write(shift_i - 1 ,temp);
 		shift_i++;
 	}
-
+	node_setSize(size -1);
 }
 
 void node_edit(byte index, schedule s)
 {
 	int insert_index = 0;
+	const byte size = node_size();
 	schedule edit_s = node_get(index);
 	if (s < edit_s)
 	{
@@ -170,7 +251,7 @@ void node_edit(byte index, schedule s)
 			node_write(insert_index,edit_s);
 			insert_index--;	
 		} 
-		node_write(insert_index, node_write)
+		node_write(insert_index, s);
 	}
 	else if (s > edit_s)
 	{
@@ -185,7 +266,7 @@ void node_edit(byte index, schedule s)
 			node_write(insert_index,edit_s);
 			insert_index++;	
 		} 
-		node_write(insert_index, node_write)
+		node_write(insert_index, s);
 	}
 	else // equal
 	{

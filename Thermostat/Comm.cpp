@@ -34,11 +34,16 @@ cmd_type commBase::read()
 	byte packet[PACKET_SIZE]; //packet buffer
 	if (com.available())
 	{
+		delay(5);
 		com.read(packet, PACKET_SIZE);
-		// for (int i = 0; i < PACKET_SIZE; i++)
-		// 	PT(packet[i]);
-		// PTL();
 	}
+	else
+		return ret;
+
+
+	for (int i = 0; i < PACKET_SIZE; i++)
+		PT(packet[i]);
+	PTL();
 
 	byte cmd = packet[0]; //first packet gives the type of packet
 	if (cmd == PKT_UPDATE_TEMPERATURE)
