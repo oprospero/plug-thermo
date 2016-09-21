@@ -1,3 +1,6 @@
+#include <Time.h>
+#include <TimeLib.h>
+
 //Work on toString function for printing schedules values
 
 
@@ -26,16 +29,18 @@ ESP8266 esp;
 void setup() {
   Serial.begin(9600);
   PTLS("Initializing");
-  
-  com.begin();
-  pinMode(RELAY_PIN, OUTPUT); 
   initialize_diplay();
+  delay(50);
+  pinMode(RELAY_PIN, OUTPUT); 
   init_button();
   init_wifi();
+  delay(50);
   init_mem();
   setSyncInterval( 5 ); // Set small so we can sync asap
   //Setting up callback for updating time
   setSyncProvider( (getExternalTime) espUpdateTime);
+  delay(2000);
+  com.begin();
   
 //  lcd.clear();
   lcd.print("Initialized");
@@ -63,7 +68,7 @@ void loop() {
   
   // See if any buttons are pressed
   button_input = detect_button();
-//  PT("Button: "); PTL((int) button);
+//  PT("Button: "); PTL((int) button_input);
 
   updateLCDscreen();
 }
@@ -75,7 +80,7 @@ void initialize_diplay()
   lcd.init();
   lcd.print(F("Initializing"));
   lcd.backlight();
-  delay(1000);
+//  delay(1000);
   lcd.clear();
 //  lcd.cursor();
 }
