@@ -18,21 +18,32 @@ int operator-(const schedule& left, const schedule& right)
 }
 bool operator>(const schedule& left, const schedule& right)
 {
+	PTS("day: ");
+	PT(left.day); PTS("-");
+	PTL(right.day);
 	if (left.day > right.day)
 		return true;
-	else if (left.day == right.day)
+	else if (left.day < right.day)
+		return false;
+	else // (left.day == right.day)
 	{
+		PTS("hour: ");
+		PT(left.hour); PTS("-");
+		PTL(right.hour);
 		if (left.hour > right.hour)
 			return true;
-		else if (left.hour == right.hour)
+		else if (left.hour < right.hour)
+			return false;
+		else
 		{
+			PTS("minute: ");
+			PT(left.minute); PTS("-");
+			PTL(right.minute);
 			if (left.minute > right.minute)
 				return true;
-			else
-				return false;
 		}
+
 	}
-	 // (left.day < right.day)
 	return false;
 }
 
@@ -48,16 +59,18 @@ bool operator<(const schedule& left, const schedule& right)
 {
 	if (left.day < right.day)
 		return true;
-	else if (left.day == right.day)
+	else if (left.day > right.day)
+		return false;
+	else //if (left.day == right.day)
 	{
 		if (left.hour < right.hour)
 			return true;
-		else if (left.hour == right.hour)
+		else if (left.hour > right.hour)
+			return false;
+		else //if (left.hour == right.hour)
 		{
 			if (left.minute < right.minute)
 				return true;
-			else
-				return false;
 		}
 	}
 	// (left.day > right.day)

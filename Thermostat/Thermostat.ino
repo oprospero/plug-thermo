@@ -49,7 +49,7 @@ void setup() {
 
 
 void loop() {
-  delay(50);
+  delay(100);
   check_serial_cmd();
   
   //Update temperature reading
@@ -115,17 +115,28 @@ inline void updateTargetTemperature() {
   time_t t = now();
   schedule s_now = convertTimeFormat(t);
   char nextNodeIndex = currentNodeIndex + 1;
-  if (nextNodeIndex >= node_size()) {
+  if (nextNodeIndex >= node_size()) 
+  {
     nextNodeIndex = 0;
+    schedule currentNode = node_get(currentNodeIndex);
+    schedule nextNode = node_get(nextNodeIndex);
+    if (s_now < currentNode && s_now >= nextNode)
+    {
+      currentNodeIndex = nextNodeIndex;
+      target_temperature = nextNode.temperature;
+    }
   }
-  schedule nextNode = node_get(nextNodeIndex);
-  if (s_now >= nextNode){
-    currentNodeIndex = nextNodeIndex;
-    target_temperature = nextNode.temperature;
-    PTS("Current node: ");
-    PTL(currentNodeIndex, DEC);
-    PTS("Target Temp: ");
-    PTL(target_temperature, DEC);
+  else 
+  {
+    schedule nextNode = node_get(nextNodeIndex);
+    if (s_now >= nextNode){
+      currentNodeIndex = nextNodeIndex;
+      target_temperature = nextNode.temperature;
+      PTS("Current node: ");
+      PTL(currentNodeIndex, DEC);
+      PTS("Target Temp: ");
+      PTL(target_temperature, DEC);
+    }
   }
 }
 

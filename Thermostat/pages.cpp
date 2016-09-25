@@ -104,10 +104,10 @@ inline void page_home() {
   //      PTL(str_time);
   lcd.print(str_time);
 
-  if (button_input == PLUS_UP || button_input == PLUS_HOLD) {
+  if (button_input == PLUS_UP) {
     target_temperature++;
   }
-  else if (button_input == MINUS_UP || button_input == MINUS_HOLD) {
+  else if (button_input == MINUS_UP) {
     target_temperature--;
   }
   else if (button_input == SET_UP) {
@@ -131,10 +131,10 @@ inline void page_listMode() {
   lcd.setCursor(0,1);      
   lcd.print(menu[((selected+1) % 4)]);
   
-  if(button_input == PLUS_UP || button_input == PLUS_HOLD) {
+  if(button_input == PLUS_UP) {
     selected += 1;
     selected =  selected % 4;
-  } else if (button_input == MINUS_UP || button_input == MINUS_HOLD) {
+  } else if (button_input == MINUS_UP) {
     selected -= 1;
     if(selected == -1) {
       selected = 3;
@@ -178,13 +178,13 @@ inline void page_pickSchedule() {
     lcd.print("Targ Temp: " + (String)s.temperature);
   }
   
-  if (button_input == PLUS_UP || button_input == PLUS_HOLD)
+  if (button_input == PLUS_UP)
   {
     node_index += 1;
     if (node_index >= node_size())
       node_index = 0;
   }
-  else if (button_input == MINUS_UP || button_input == MINUS_HOLD)
+  else if (button_input == MINUS_UP)
   {
     node_index -= 1;
     if(node_index < 0) {
@@ -223,7 +223,7 @@ inline void page_modifySchedule(){
   lcd.print(t);
   lcd.setCursor(0,1);
   lcd.print("Temp: " + (String) s.temperature);
-  if (button_input == PLUS_UP || button_input == PLUS_HOLD) {
+  if (button_input == PLUS_UP) {
     if (value == 0) {
       s.day++;
       if (s.day >= 8) s.day = 1;
@@ -238,7 +238,7 @@ inline void page_modifySchedule(){
       if (s.temperature >= 99) 
         s.temperature = 99;
     }
-  } else if (button_input == MINUS_UP || button_input == MINUS_HOLD) {
+  } else if (button_input == MINUS_UP) {
     if (value == 0) {
       s.day--;
       if (s.day <= 0) s.day = 7;
@@ -283,7 +283,7 @@ inline void page_addSchedule() {
   lcd.setCursor(0,1);
   lcd.print(F("Temp: "));
   lcd.print(s.temperature);
-  if (button_input == PLUS_UP || button_input == PLUS_HOLD) {
+  if (button_input == PLUS_UP) {
     if (value == 0) {
       s.day++;
       if (s.day >= 8) s.day = 1;
@@ -299,7 +299,7 @@ inline void page_addSchedule() {
         s.temperature = 99;
     }
   }
-  else if (button_input == MINUS_UP || button_input == MINUS_HOLD) {
+  else if (button_input == MINUS_UP) {
     if (value == 0) {
       s.day--;
       if (s.day <= 0) s.day = 7;
@@ -339,13 +339,13 @@ inline void page_modifyTime() {
   else if (timeScaleIndex == 1) lcd.setCursor(0,4);
   else if (timeScaleIndex == 2) lcd.setCursor(0,7);
     
-  if (button_input == PLUS_UP || button_input == PLUS_HOLD)
+  if (button_input == PLUS_UP)
   {
     long adjust = timeScale[timeScaleIndex];
     adjustTime(adjust);
     setSyncInterval(SCALE_HOUR);
   }
-  else if (button_input == MINUS_UP || button_input == MINUS_HOLD)
+  else if (button_input == MINUS_UP)
   {
     long adjust = -timeScale[timeScaleIndex];
     adjustTime(adjust);
@@ -369,11 +369,10 @@ void updateLCDscreen() {
   static int last_update = 0;
   int diff = millis() - last_update;
 
-
-
   if (button_input != NONE
     || diff > 1000
-    || forceLCDupdate) {
+    || forceLCDupdate) 
+  {
     last_update = millis();
     if (forceLCDupdate) forceLCDupdate = false;
 
