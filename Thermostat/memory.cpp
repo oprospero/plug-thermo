@@ -129,8 +129,21 @@ void node_setSize(byte size)
 
 void node_RESET()
 {
-	for (int i = 0; i < 14; i++) {
-		schedule s;
+	schedule s;
+	s.day = 1;
+	s.hour = 7;
+	s.minute = 0;
+	s.temperature = 50;
+	node_write(0,s);
+
+	s.day = 1;
+	s.hour = 19;
+	s.minute = 0;
+	s.temperature = 60;
+	node_write(1,s);
+
+	for (int i = 2; i < 12; i++) {
+		// schedule s;
 		s.day = i / 2 + 1;
 		s.minute = 0;
 		if (i % 2  == 0) {
@@ -139,11 +152,25 @@ void node_RESET()
 		}
 		else {
 			s.hour = 18;
-			s.temperature = 70;
+			s.temperature = 65;
 		}
 		node_write(i,s);
 	}
+
+	s.day = 1;
+	s.hour = 8;
+	s.minute = 0;
+	s.temperature = 50;
+	node_write(12,s);
+
+	s.day = 1;
+	s.hour = 19;
+	s.minute = 0;
+	s.temperature = 60;
+	node_write(13,s);
+
 	node_setSize(14);
+
 }
 
 
