@@ -9,6 +9,7 @@ float temperature;
 float humidity;
 float heatIndex;
 int t_lastSent = 0;
+float avg_heatIndex = 0;
 commRemote com;
 
 void setup() {
@@ -23,6 +24,7 @@ void loop() {
   temperature = dht.readTemperature(true);
   humidity = dht.readHumidity();
   heatIndex = dht.computeHeatIndex(temperature, humidity);
+
   if (isnan(heatIndex))
   {
     Serial.print("No Temperature Readings");
@@ -33,9 +35,9 @@ void loop() {
     Serial.println(heatIndex);
     if (avg_heatIndex == 0)
     {
-      avg_heatIndex = 
+      avg_heatIndex = heatIndex;
     }
-    avg_heatIndex 
+    avg_heatIndex = (avg_heatIndex + heatIndex) / 2;
 //    com.sendTemperature(heatIndex);
   }
   
@@ -49,10 +51,12 @@ void loop() {
     Serial.println(humidity);
 //    com.sendHumidity(humidity);
   }
-  delay(4000);
+  delay(3000);
+
 
   int t_now = millis();
   int t_diff = t_now - t_lastSent;
+  // Send every 10 sec
   if (t_diff > 10000)
   {
     com.sendTemperature(heatIndex);
